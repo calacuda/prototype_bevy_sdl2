@@ -19,7 +19,7 @@ bevy_window = { version = "0.14.2" }
 bevy = { version = "0.14.2", default-features = false }
 
 # other
-sdl2 = { version = "0.37", features = ["raw-window-handle"] }
+sdl2 = { version = "^0.37", features = ["raw-window-handle"] }
 raw-window-handle = "0.3"
 log = { version = "0.4", features = ["release_max_level_info"] }
 

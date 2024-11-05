@@ -2,7 +2,7 @@
 use crate::sdl2_windows::Sdl2Windows;
 use bevy::prelude::*;
 // use bevy_app::prelude::*;
-use bevy_app::AppExit;
+use bevy_app::{AppExit, PluginsState};
 // use bevy_ecs::storage::Resources;
 // use bevy_input::keyboard::{ElementState, KeyboardInput};
 // use bevy_input::mouse::{MouseButtonInput, MouseMotion};
@@ -93,6 +93,11 @@ pub fn sdl2_runner(mut app: App) -> AppExit {
 
     // SDL2 has a lot of events we can support, expose them all via an event
     app.add_event::<Sdl2Event>();
+
+    if app.plugins_state() == PluginsState::Ready {
+        app.finish();
+        app.cleanup();
+    }
 
     log::debug!("Entering SDL2 event loop");
 
