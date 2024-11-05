@@ -1,15 +1,14 @@
 // mod converters;
 use crate::sdl2_windows::Sdl2Windows;
 use bevy::prelude::*;
-// use bevy_app::prelude::*;
+use bevy_app::prelude::*;
 use bevy_app::AppExit;
-// use bevy_ecs::storage::Resources;
+use bevy_ecs::storage::Resources;
 // use bevy_input::keyboard::{ElementState, KeyboardInput};
-// use bevy_input::mouse::{MouseButtonInput, MouseMotion};
-// use bevy_math::prelude::*;
-use bevy_window::{CursorMoved, PrimaryWindow, WindowCloseRequested, WindowCreated, WindowResized};
-// use sdl2_windows::Sdl2WindowArgs;
-// use sdl2::sys::Window;
+use bevy_input::mouse::{MouseButtonInput, MouseMotion};
+use bevy_math::prelude::*;
+use bevy_window::{CursorMoved, WindowCloseRequested, WindowCreated, WindowResized};
+use sdl2::sys::Window;
 
 mod sdl2_windows;
 
@@ -46,53 +45,18 @@ pub fn sdl2_runner(mut app: App) -> AppExit {
 
     // let mut create_window_event_reader = EventReader::<CreateWindow>::default();
     // let mut app_exit_event_reader = EventReader::<AppExit>::default();
-
+    
     // let mut create_window_event_reader = app.add_event::<Create>();
 
-    create_primary_window(
+    handle_create_window_events(
         app.world_mut(),
         &video_subsystem,
         &mut sdl2_windows,
         // &mut create_window_event_reader,
     );
 
-    // let window = Sdl2Window::new(
-    //     &video_subsystem,
-    //     Sdl2WindowArgs {
-    //         title: "bevy-sdl".into(),
-    //         width: 1280,
-    //         height: 720,
-    //     },
-    //     &mut app,
-    // );
-
-    // let title = "bevy-sdl2";
-    //
-    // let sdl2_window = video_subsystem
-    //     .window(&title, 1280, 720)
-    //     .position_centered()
-    //     .resizable()
-    //     .build()
-    //     .expect("Failed to create window");
-    //
-    // let bevy_window = Window {
-    //     mode: bevy_window::WindowMode::Fullscreen,
-    //     title: title.into(),
-    //     name: Some(title.into()),
-    //     focused: true,
-    //     ..default()
-    // };
-    //
-    // let mut commands = app.world_mut().commands();
-    //
-    // let window = commands.spawn((bevy_window, PrimaryWindow));
-    //
-    // app.world().send_event(WindowCreated {
-    //     window: window.id(),
-    // });
-
     // SDL2 has a lot of events we can support, expose them all via an event
-    app.add_event::<Sdl2Event>();
+    app.world_mut().insert_resource(Events::<Sdl2Event>);
 
     log::debug!("Entering SDL2 event loop");
 
@@ -116,19 +80,19 @@ pub fn sdl2_runner(mut app: App) -> AppExit {
             for event in event_pump.poll_iter() {
                 match event {
                     sdl2::event::Event::Window {
-                        window_id: _,
+                        window_id,
                         win_event,
                         ..
                     } => match win_event {
                         sdl2::event::WindowEvent::Close => {
-                            // let mut window_close_requested_events = app
-                            //     // .resources
-                            //     .world_mut()
-                            //     .resource_mut::<Events<WindowCloseRequested>>();
+                            let mut window_close_requested_events = app
+                                // .resources
+                                .world_mut()
+                                .resource_mut::<Events<WindowCloseRequested>>();
                             // let window_id = sdl2_windows.get_window_id(window_id).unwrap();
                             // window_close_requested_events
                             //     .send(WindowCloseRequested { id: window_id });
-                            log::info!("window closed, exiting event loop...");
+                            info!("window closed, exiting event loop...");
                             return AppExit::Success;
                         }
                         // sdl2::event::WindowEvent::Resized(width, height) => {
@@ -253,62 +217,22 @@ pub fn sdl2_runner(mut app: App) -> AppExit {
 //     });
 // }
 
-// fn handle_create_window_events(
-//     app: &mut App,
-//     sdl2_video_subsystem: &sdl2::VideoSubsystem,
-//     sdl2_window: &mut Sdl2Window,
-//     // create_window_event_reader: &mut EventReader<CreateWindow>,
-// ) {
-//     // let mut windows = resources.get_mut::<Windows>().unwrap();
-//     // let create_window_events = resources.get::<Events<CreateWindow>>().unwrap();
-//     // let create_window_events = world.get_resource_mut::<Events<CreateWindow>>().unwrap();
-//     // let mut window_created_events = world.get_resource_mut::<Events<WindowCreated>>().unwrap();
-//
-//     // for create_window_event in create_window_event_reader.iter(&create_window_events) {
-//     // for create_window_event in  {
-//     let window = sdl2_window::new(sdl2_video_subsystem);
-//     // let window_id = window.id;
-//     // windows.add(window);
-//
-//     // window_created_events.send(WindowCreated { window });
-//     // }
-//     app.insert_resource(window)
-// }
-
-fn do_create_primary_window(
+fn handle_create_window_events(
     world: &mut World,
     sdl2_video_subsystem: &sdl2::VideoSubsystem,
     sdl2_windows: &mut Sdl2Windows,
-    // create_window_event_reader: &mut EventReader<WindowCreated>,
-) -> Entity {
-    // let mut windows = world.spawn().unwrap();
-    // let create_window_events = resources.get::<Events<CreateWindow>>().unwrap();
-    // let mut window_created_events = resources.get_mut::<Events<WindowCreated>>().unwrap();
-    // for create_window_event in create_window_event_reader.iter(&create_window_events) {
-
-    let mut entity = world.spawn_empty();
-    let window = sdl2_windows.create_window(sdl2_video_subsystem, entity.id());
-    // let window_id = window;
-    entity.insert((window, PrimaryWindow));
-    // windows.add(window);
-    // world.spawn()
-    // world.send_event(WindowCreated {
-    //     window: entity.id(),
-    // });
-
-    // .send(WindowCreated { window: window });
-    // }
-    entity.id()
-}
-
-fn create_primary_window(
-    world: &mut World,
-    sdl2_video_subsystem: &sdl2::VideoSubsystem,
-    sdl2_windows: &mut Sdl2Windows,
-    // create_window_event_reader: &mut EventReader<WindowCreated>,
+    // create_window_event_reader: &mut EventReader<CreateWindow>,
 ) {
-    let w_id = do_create_primary_window(world, sdl2_video_subsystem, sdl2_windows);
+    // let mut windows = resources.get_mut::<Windows>().unwrap();
+    // let create_window_events = resources.get::<Events<CreateWindow>>().unwrap();
+    let mut window_created_events = world.get_resource_mut::<Events<WindowCreated>>().unwrap();
 
-    world.send_event(WindowCreated { window: w_id });
-    // }
+    // for create_window_event in create_window_event_reader.iter(&create_window_events) {
+    for create_window_event in  {
+        let window = sdl2_windows.create_window(sdl2_video_subsystem, &create_window_event);
+        // let window_id = window.id;
+        // windows.add(window);
+
+        window_created_events.send(WindowCreated { window });
+    }
 }
